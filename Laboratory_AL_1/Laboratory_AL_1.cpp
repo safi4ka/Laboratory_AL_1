@@ -40,6 +40,58 @@ double vvod_drobnogo(double min_znachenie, double max_znachenie) {
     return chislo;
 }
 
+void dobavit_trubu(Truba& truba) {
+    cout << "Vvedite nazvanie trubi: ";
+    cin >> ws;
+    getline(cin, truba.nazvanie);
+    cout << "Vvedite dlinu (km): ";
+    truba.dlina = vvod_drobnogo(0.1, 100000.0);
+    cout << "Vvedite diametr (mm): ";
+    truba.diametr = vvod_celogo(10, 5000);
+    cout << "Truba v remonte? (1 - da, 0 - net): ";
+    truba.v_remonte = vvod_celogo(0, 1);
+    truba.sozdana = true;
+    cout << "Truba uspeshno dobavlena!\n";
+}
+
+void dobavit_stanciyu(Stanciya& stanciya) {
+    cout << "Vvedite nazvanie stancii: ";
+    cin >> ws;
+    getline(cin, stanciya.nazvanie);
+    cout << "Vvedite vsego cehov: ";
+    stanciya.vsego_cehov = vvod_celogo(1, 100);
+    cout << "Vvedite rabochih cehov: ";
+    stanciya.rabochih_cehov = vvod_celogo(0, stanciya.vsego_cehov);
+    cout << "Vvedite klass stancii (1-5): ";
+    stanciya.klass = vvod_celogo(1, 5);
+    stanciya.sozdana = true;
+    cout << "Stanciya uspeshno dobavlena!\n";
+}
+
+void prosmotr(Truba& truba, Stanciya& stanciya) {
+    if (truba.sozdana) {
+        cout << "\n--- TRUBA ---\n";
+        cout << "Nazvanie: " << truba.nazvanie << "\n";
+        cout << "Dlina: " << truba.dlina << " km\n";
+        cout << "Diametr: " << truba.diametr << " mm\n";
+        cout << "V remonte: " << (truba.v_remonte ? "Da" : "Net") << "\n";
+    }
+    else {
+        cout << "\nTruba ne sozdana.\n";
+    }
+
+    if (stanciya.sozdana) {
+        cout << "\n--- STANCIYA ---\n";
+        cout << "Nazvanie: " << stanciya.nazvanie << "\n";
+        cout << "Vsego cehov: " << stanciya.vsego_cehov << "\n";
+        cout << "Rabochih cehov: " << stanciya.rabochih_cehov << "\n";
+        cout << "Klass stancii: " << stanciya.klass << "\n";
+    }
+    else {
+        cout << "\nStanciya ne sozdana.\n";
+    }
+}
+
 int main() {
     Truba moya_truba;
     Stanciya moya_stanciya;
@@ -59,7 +111,10 @@ int main() {
 
         vibor_menyu = vvod_celogo(0, 7);
 
-        if (vibor_menyu == 0) {
+        if (vibor_menyu == 1) dobavit_trubu(moya_truba);
+        else if (vibor_menyu == 2) dobavit_stanciyu(moya_stanciya);
+        else if (vibor_menyu == 3) prosmotr(moya_truba, moya_stanciya);
+        else if (vibor_menyu == 0) {
             cout << "Vihod iz programmi...\n";
             break;
         }
