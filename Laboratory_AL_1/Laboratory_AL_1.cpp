@@ -129,6 +129,58 @@ void redaktirovat_stanciyu(Stanciya& stanciya) {
     }
 }
 
+void sohranit(Truba& truba, Stanciya& stanciya) {
+    ofstream fayl("dannie.txt");
+    if (fayl.is_open()) {
+        fayl << truba.sozdana << endl;
+        if (truba.sozdana) {
+            fayl << truba.nazvanie << endl;
+            fayl << truba.dlina << endl;
+            fayl << truba.diametr << endl;
+            fayl << truba.v_remonte << endl;
+        }
+        fayl << stanciya.sozdana << endl;
+        if (stanciya.sozdana) {
+            fayl << stanciya.nazvanie << endl;
+            fayl << stanciya.vsego_cehov << endl;
+            fayl << stanciya.rabochih_cehov << endl;
+            fayl << stanciya.klass << endl;
+        }
+        cout << "Dannie sohraneni v fayl dannie.txt!\n";
+        fayl.close();
+    }
+    else {
+        cout << "Oshibka zapisi v fayl!\n";
+    }
+}
+
+void zagruzit(Truba& truba, Stanciya& stanciya) {
+    ifstream fayl("dannie.txt");
+    if (fayl.is_open()) {
+        fayl >> truba.sozdana;
+        if (truba.sozdana) {
+            fayl >> ws;
+            getline(fayl, truba.nazvanie);
+            fayl >> truba.dlina;
+            fayl >> truba.diametr;
+            fayl >> truba.v_remonte;
+        }
+        fayl >> stanciya.sozdana;
+        if (stanciya.sozdana) {
+            fayl >> ws;
+            getline(fayl, stanciya.nazvanie);
+            fayl >> stanciya.vsego_cehov;
+            fayl >> stanciya.rabochih_cehov;
+            fayl >> stanciya.klass;
+        }
+        cout << "Dannie zagruzeni iz fayla!\n";
+        fayl.close();
+    }
+    else {
+        cout << "Fayl ne nayden!\n";
+    }
+}
+
 int main() {
     Truba moya_truba;
     Stanciya moya_stanciya;
@@ -153,6 +205,8 @@ int main() {
         else if (vibor_menyu == 3) prosmotr(moya_truba, moya_stanciya);
         else if (vibor_menyu == 4) redaktirovat_trubu(moya_truba);
         else if (vibor_menyu == 5) redaktirovat_stanciyu(moya_stanciya);
+        else if (vibor_menyu == 6) sohranit(moya_truba, moya_stanciya);
+        else if (vibor_menyu == 7) zagruzit(moya_truba, moya_stanciya);
         else if (vibor_menyu == 0) {
             cout << "Vihod iz programmi...\n";
             break;
