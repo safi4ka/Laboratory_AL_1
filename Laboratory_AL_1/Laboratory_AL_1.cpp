@@ -92,6 +92,43 @@ void prosmotr(Truba& truba, Stanciya& stanciya) {
     }
 }
 
+void redaktirovat_trubu(Truba& truba) {
+    if (!truba.sozdana) {
+        cout << "Oshibka: Snachala dobavte trubu!\n";
+        return;
+    }
+    cout << "Truba v remonte? (Seychas: " << truba.v_remonte << "). Vvedite 1 (da) ili 0 (net): ";
+    truba.v_remonte = vvod_celogo(0, 1);
+    cout << "Status trubi obnovlen!\n";
+}
+
+void redaktirovat_stanciyu(Stanciya& stanciya) {
+    if (!stanciya.sozdana) {
+        cout << "Oshibka: Snachala dobavte stanciyu!\n";
+        return;
+    }
+    cout << "1 - Zapustit ceh, 2 - Ostanovit ceh. Vash vibor: ";
+    int deystvie = vvod_celogo(1, 2);
+    if (deystvie == 1) {
+        if (stanciya.rabochih_cehov < stanciya.vsego_cehov) {
+            stanciya.rabochih_cehov++;
+            cout << "Ceh zapuschen!\n";
+        }
+        else {
+            cout << "Vse cehi i tak rabotayut!\n";
+        }
+    }
+    else {
+        if (stanciya.rabochih_cehov > 0) {
+            stanciya.rabochih_cehov--;
+            cout << "Ceh ostanovlen!\n";
+        }
+        else {
+            cout << "Vse cehi i tak ostanovleni!\n";
+        }
+    }
+}
+
 int main() {
     Truba moya_truba;
     Stanciya moya_stanciya;
@@ -114,6 +151,8 @@ int main() {
         if (vibor_menyu == 1) dobavit_trubu(moya_truba);
         else if (vibor_menyu == 2) dobavit_stanciyu(moya_stanciya);
         else if (vibor_menyu == 3) prosmotr(moya_truba, moya_stanciya);
+        else if (vibor_menyu == 4) redaktirovat_trubu(moya_truba);
+        else if (vibor_menyu == 5) redaktirovat_stanciyu(moya_stanciya);
         else if (vibor_menyu == 0) {
             cout << "Vihod iz programmi...\n";
             break;
