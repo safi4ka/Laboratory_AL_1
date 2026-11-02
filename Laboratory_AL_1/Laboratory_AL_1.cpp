@@ -4,6 +4,7 @@
 #include <clocale>
 #include <map>
 #include <vector>
+#include <windows.h>
 
 using namespace std;
 
@@ -53,7 +54,7 @@ double vvod_drobnogo(double min_znachenie, double max_znachenie) {
 
 // Вспомогательные функции вывода одного объекта
 void pokazat_trubu(int id, Truba& truba) {
-    cout << "\n--- ТРУБА (ID: " << id << ") ---\n";
+    cout << "\nТРУБА (ID: " << id << ")\n";
     cout << "Название: " << truba.nazvanie << "\n";
     cout << "Длина: " << truba.dlina << " км\n";
     cout << "Диаметр: " << truba.diametr << " мм\n";
@@ -62,7 +63,7 @@ void pokazat_trubu(int id, Truba& truba) {
 
 void pokazat_stanciyu(int id, Stanciya& stanciya) {
     double procent = (stanciya.vsego_cehov - stanciya.rabochih_cehov) * 100.0 / stanciya.vsego_cehov;
-    cout << "\n--- СТАНЦИЯ (ID: " << id << ") ---\n";
+    cout << "\nСТАНЦИЯ (ID: " << id << ")\n";
     cout << "Название: " << stanciya.nazvanie << "\n";
     cout << "Всего цехов: " << stanciya.vsego_cehov << "\n";
     cout << "Рабочих цехов: " << stanciya.rabochih_cehov << "\n";
@@ -111,7 +112,7 @@ void dobavit_stanciyu(map<int, Stanciya>& stancii, int& id_stancii) {
 
 // Функция просмотра всех объектов
 void prosmotr(map<int, Truba>& trubi, map<int, Stanciya>& stancii) {
-    cout << "\n=== СПИСОК ТРУБ ===\n";
+    cout << "\nСПИСОК ТРУБ\n";
     if (trubi.empty()) {
         cout << "Трубы не созданы.\n";
     }
@@ -121,7 +122,7 @@ void prosmotr(map<int, Truba>& trubi, map<int, Stanciya>& stancii) {
         }
     }
 
-    cout << "\n=== СПИСОК СТАНЦИЙ ===\n";
+    cout << "\nСПИСОК СТАНЦИЙ\n";
     if (stancii.empty()) {
         cout << "Станции не созданы.\n";
     }
@@ -307,7 +308,7 @@ void poisk_trub(map<int, Truba>& trubi) {
 
     if (vibor == 1) {
         string poisk_nazvanie;
-        cout << "Введите название (или часть названия) трубы: ";
+        cout << "Введите название трубы: ";
         cin >> ws;
         getline(cin, poisk_nazvanie);
         log_fayl << poisk_nazvanie << endl;
@@ -403,7 +404,7 @@ void poisk_stanciy(map<int, Stanciya>& stancii) {
 // Работа с файлами
 void sohranit(map<int, Truba>& trubi, map<int, Stanciya>& stancii) {
     string imya_fayla;
-    cout << "Введите название файла для сохранения (например, dannie.txt): ";
+    cout << "Придумайте название файла для сохранения: ";
     cin >> ws;
     getline(cin, imya_fayla);
     log_fayl << imya_fayla << endl;
@@ -437,7 +438,7 @@ void sohranit(map<int, Truba>& trubi, map<int, Stanciya>& stancii) {
 
 void zagruzit(map<int, Truba>& trubi, map<int, Stanciya>& stancii, int& id_trubi, int& id_stancii) {
     string imya_fayla;
-    cout << "Введите название файла для загрузки (например, dannie.txt): ";
+    cout << "Введите название файла для загрузки: ";
     cin >> ws;
     getline(cin, imya_fayla);
     log_fayl << imya_fayla << endl;
@@ -489,6 +490,8 @@ void zagruzit(map<int, Truba>& trubi, map<int, Stanciya>& stancii, int& id_trubi
 // Главное меню
 int main() {
     setlocale(LC_ALL, "Russian");
+    SetConsoleCP(1251);       // Включает ввод русских букв
+    SetConsoleOutputCP(1251); // Включает вывод русских букв
 
     map<int, Truba> trubi;
     map<int, Stanciya> stancii;
