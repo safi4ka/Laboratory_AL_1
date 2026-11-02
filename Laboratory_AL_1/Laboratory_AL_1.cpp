@@ -9,7 +9,7 @@ using namespace std;
 // Файл для логирования действий пользователя
 ofstream log_fayl("log.txt");
 
-// Базовые классы (заменили struct на class для выполнения ТЗ)
+// Базовые классы
 class Truba {
 public:
     string nazvanie = "";
@@ -50,7 +50,24 @@ double vvod_drobnogo(double min_znachenie, double max_znachenie) {
     return chislo;
 }
 
-// Функции добавления (теперь добавляют объекты в map с уникальным ID)
+// Вспомогательные функции вывода одного объекта (чтобы не дублировать код)
+void pokazat_trubu(int id, Truba& truba) {
+    cout << "\n--- ТРУБА (ID: " << id << ") ---\n";
+    cout << "Название: " << truba.nazvanie << "\n";
+    cout << "Длина: " << truba.dlina << " км\n";
+    cout << "Диаметр: " << truba.diametr << " мм\n";
+    cout << "В ремонте: " << (truba.v_remonte ? "Да" : "Нет") << "\n";
+}
+
+void pokazat_stanciyu(int id, Stanciya& stanciya) {
+    cout << "\n--- СТАНЦИЯ (ID: " << id << ") ---\n";
+    cout << "Название: " << stanciya.nazvanie << "\n";
+    cout << "Всего цехов: " << stanciya.vsego_cehov << "\n";
+    cout << "Рабочих цехов: " << stanciya.rabochih_cehov << "\n";
+    cout << "Класс станции: " << stanciya.klass << "\n";
+}
+
+// Функции добавления
 void dobavit_trubu(map<int, Truba>& trubi, int& id_trubi) {
     Truba truba;
     cout << "Введите название трубы: ";
@@ -97,11 +114,7 @@ void prosmotr(map<int, Truba>& trubi, map<int, Stanciya>& stancii) {
     }
     else {
         for (auto& para : trubi) {
-            cout << "\n--- ТРУБА (ID: " << para.first << ") ---\n";
-            cout << "Название: " << para.second.nazvanie << "\n";
-            cout << "Длина: " << para.second.dlina << " км\n";
-            cout << "Диаметр: " << para.second.diametr << " мм\n";
-            cout << "В ремонте: " << (para.second.v_remonte ? "Да" : "Нет") << "\n";
+            pokazat_trubu(para.first, para.second);
         }
     }
 
@@ -111,11 +124,7 @@ void prosmotr(map<int, Truba>& trubi, map<int, Stanciya>& stancii) {
     }
     else {
         for (auto& para : stancii) {
-            cout << "\n--- СТАНЦИЯ (ID: " << para.first << ") ---\n";
-            cout << "Название: " << para.second.nazvanie << "\n";
-            cout << "Всего цехов: " << para.second.vsego_cehov << "\n";
-            cout << "Рабочих цехов: " << para.second.rabochih_cehov << "\n";
-            cout << "Класс станции: " << para.second.klass << "\n";
+            pokazat_stanciyu(para.first, para.second);
         }
     }
 }
@@ -174,7 +183,40 @@ void redaktirovat_stanciyu(map<int, Stanciya>& stancii) {
     }
 }
 
-// Работа с файлами (сохранение и загрузка всех объектов)
+// Функции удаления по ID
+void udalit_trubu(map<int, Truba>& trubi) {
+    if (trubi.empty()) {
+        cout << "Ошибка: Список труб пуст!\n";
+        return;
+    }
+    cout << "Введите ID трубы для удаления: ";
+    int id = vvod_celogo(1, 100000);
+
+    if (trubi.erase(id)) {
+        cout << "Труба с ID " << id << " удалена!\n";
+    }
+    else {
+        cout << "Ошибка: Труба с таким ID не найдена!\n";
+    }
+}
+
+void udalit_stanciyu(map<int, Stanciya>& stancii) {
+    if (stancii.empty()) {
+        cout << "Ошибка: Список станций пуст!\n";
+        return;
+    }
+    cout << "Введите ID станции для удаления: ";
+    int id = vvod_celogo(1, 100000);
+
+    if (stancii.erase(id)) {
+        cout << "Станция с ID " << id << " удалена!\n";
+    }
+    else {
+        cout << "Ошибка: Станция с таким ID не найдена!\n";
+    }
+}
+
+// Работа с файлами
 void sohranit(map<int, Truba>& trubi, map<int, Stanciya>& stancii) {
     string imya_fayla;
     cout << "Введите название файла для сохранения (например, dannie.txt): ";
@@ -277,12 +319,14 @@ int main() {
         cout << "3. Просмотр всех объектов\n";
         cout << "4. Редактировать трубу\n";
         cout << "5. Редактировать КС\n";
-        cout << "6. Сохранить\n";
-        cout << "7. Загрузить\n";
+        cout << "6. Удалить трубу\n";
+        cout << "7. Удалить КС\n";
+        cout << "8. Сохранить\n";
+        cout << "9. Загрузить\n";
         cout << "0. Выход\n";
         cout << "Выберите действие: ";
 
-        vibor_menyu = vvod_celogo(0, 7);
+        vibor_menyu = vvod_celogo(0, 9);
 
         switch (vibor_menyu) {
         case 1:
@@ -301,9 +345,15 @@ int main() {
             redaktirovat_stanciyu(stancii);
             break;
         case 6:
-            sohranit(trubi, stancii);
+            udalit_trubu(trubi);
             break;
         case 7:
+            udalit_stanciyu(stancii);
+            break;
+        case 8:
+            sohranit(trubi, stancii);
+            break;
+        case 9:
             zagruzit(trubi, stancii, id_trubi, id_stancii);
             break;
         case 0:
