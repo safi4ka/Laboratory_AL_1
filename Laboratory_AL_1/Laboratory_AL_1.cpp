@@ -5,21 +5,22 @@
 
 using namespace std;
 
+// Файл для логирования действий пользователя
+ofstream log_fayl("log.txt");
+
 // Базовые структуры
 struct Truba {
-    string nazvanie;
-    double dlina;
-    int diametr;
-    bool v_remonte;
-    bool sozdana = false;
+    string nazvanie = "";
+    double dlina = 0.0;
+    int diametr = 0;
+    bool v_remonte = false;
 };
 
 struct Stanciya {
-    string nazvanie;
-    int vsego_cehov;
-    int rabochih_cehov;
-    int klass;
-    bool sozdana = false;
+    string nazvanie = "";
+    int vsego_cehov = 0;
+    int rabochih_cehov = 0;
+    int klass = 0;
 };
 
 // Функция защиты от некорректного ввода (целые числа)
@@ -30,6 +31,7 @@ int vvod_celogo(int min_znachenie, int max_znachenie) {
         cin.clear();
         while (cin.get() != '\n');
     }
+    log_fayl << chislo << endl; // Логируем введенное целое число
     return chislo;
 }
 
@@ -41,6 +43,7 @@ double vvod_drobnogo(double min_znachenie, double max_znachenie) {
         cin.clear();
         while (cin.get() != '\n');
     }
+    log_fayl << chislo << endl; // Логируем введенное дробное число
     return chislo;
 }
 
@@ -49,13 +52,14 @@ void dobavit_trubu(Truba& truba) {
     cout << "Введите название трубы: ";
     cin >> ws;
     getline(cin, truba.nazvanie);
+    log_fayl << truba.nazvanie << endl; // Логируем название трубы
+
     cout << "Введите длину (км): ";
     truba.dlina = vvod_drobnogo(0.1, 100000.0);
     cout << "Введите диаметр (мм): ";
     truba.diametr = vvod_celogo(10, 5000);
     cout << "Труба в ремонте? (1 - да, 0 - нет): ";
     truba.v_remonte = vvod_celogo(0, 1);
-    truba.sozdana = true;
     cout << "Труба успешно добавлена!\n";
 }
 
@@ -63,19 +67,20 @@ void dobavit_stanciyu(Stanciya& stanciya) {
     cout << "Введите название станции: ";
     cin >> ws;
     getline(cin, stanciya.nazvanie);
+    log_fayl << stanciya.nazvanie << endl; // Логируем название станции
+
     cout << "Введите всего цехов: ";
     stanciya.vsego_cehov = vvod_celogo(1, 100);
     cout << "Введите рабочих цехов: ";
     stanciya.rabochih_cehov = vvod_celogo(0, stanciya.vsego_cehov);
     cout << "Введите класс станции (1-5): ";
     stanciya.klass = vvod_celogo(1, 5);
-    stanciya.sozdana = true;
     cout << "Станция успешно добавлена!\n";
 }
 
 // Функция просмотра
 void prosmotr(Truba& truba, Stanciya& stanciya) {
-    if (truba.sozdana) {
+    if (truba.dlina) {
         cout << "\n--- ТРУБА ---\n";
         cout << "Название: " << truba.nazvanie << "\n";
         cout << "Длина: " << truba.dlina << " км\n";
@@ -86,7 +91,7 @@ void prosmotr(Truba& truba, Stanciya& stanciya) {
         cout << "\nТруба не создана.\n";
     }
 
-    if (stanciya.sozdana) {
+    if (stanciya.vsego_cehov) {
         cout << "\n--- СТАНЦИЯ ---\n";
         cout << "Название: " << stanciya.nazvanie << "\n";
         cout << "Всего цехов: " << stanciya.vsego_cehov << "\n";
@@ -100,7 +105,7 @@ void prosmotr(Truba& truba, Stanciya& stanciya) {
 
 // Функции редактирования
 void redaktirovat_trubu(Truba& truba) {
-    if (!truba.sozdana) {
+    if (!truba.dlina) {
         cout << "Ошибка: Сначала добавьте трубу!\n";
         return;
     }
@@ -110,7 +115,7 @@ void redaktirovat_trubu(Truba& truba) {
 }
 
 void redaktirovat_stanciyu(Stanciya& stanciya) {
-    if (!stanciya.sozdana) {
+    if (!stanciya.vsego_cehov) {
         cout << "Ошибка: Сначала добавьте станцию!\n";
         return;
     }
@@ -138,23 +143,29 @@ void redaktirovat_stanciyu(Stanciya& stanciya) {
 
 // Работа с файлами
 void sohranit(Truba& truba, Stanciya& stanciya) {
-    ofstream fayl("dannie.txt");
+    string imya_fayla;
+    cout << "Введите название файла для сохранения (например, dannie.txt): ";
+    cin >> ws;
+    getline(cin, imya_fayla);
+    log_fayl << imya_fayla << endl; // Логируем имя файла
+
+    ofstream fayl(imya_fayla);
     if (fayl.is_open()) {
-        fayl << truba.sozdana << endl;
-        if (truba.sozdana) {
+        fayl << truba.dlina << endl;
+        if (truba.dlina) {
             fayl << truba.nazvanie << endl;
             fayl << truba.dlina << endl;
             fayl << truba.diametr << endl;
             fayl << truba.v_remonte << endl;
         }
-        fayl << stanciya.sozdana << endl;
-        if (stanciya.sozdana) {
+        fayl << stanciya.vsego_cehov << endl;
+        if (stanciya.vsego_cehov) {
             fayl << stanciya.nazvanie << endl;
             fayl << stanciya.vsego_cehov << endl;
             fayl << stanciya.rabochih_cehov << endl;
             fayl << stanciya.klass << endl;
         }
-        cout << "Данные сохранены в файл dannie.txt!\n";
+        cout << "Данные сохранены в файл " << imya_fayla << "!\n";
         fayl.close();
     }
     else {
@@ -163,25 +174,31 @@ void sohranit(Truba& truba, Stanciya& stanciya) {
 }
 
 void zagruzit(Truba& truba, Stanciya& stanciya) {
-    ifstream fayl("dannie.txt");
+    string imya_fayla;
+    cout << "Введите название файла для загрузки (например, dannie.txt): ";
+    cin >> ws;
+    getline(cin, imya_fayla);
+    log_fayl << imya_fayla << endl; // Логируем имя файла
+
+    ifstream fayl(imya_fayla);
     if (fayl.is_open()) {
-        fayl >> truba.sozdana;
-        if (truba.sozdana) {
+        fayl >> truba.dlina;
+        if (truba.dlina) {
             fayl >> ws;
             getline(fayl, truba.nazvanie);
             fayl >> truba.dlina;
             fayl >> truba.diametr;
             fayl >> truba.v_remonte;
         }
-        fayl >> stanciya.sozdana;
-        if (stanciya.sozdana) {
+        fayl >> stanciya.vsego_cehov;
+        if (stanciya.vsego_cehov) {
             fayl >> ws;
             getline(fayl, stanciya.nazvanie);
             fayl >> stanciya.vsego_cehov;
             fayl >> stanciya.rabochih_cehov;
             fayl >> stanciya.klass;
         }
-        cout << "Данные загружены из файла!\n";
+        cout << "Данные загружены из файла " << imya_fayla << "!\n";
         fayl.close();
     }
     else {
@@ -198,7 +215,7 @@ int main() {
     int vibor_menyu;
 
     while (true) {
-        cout << "\Меню\n";
+        cout << "\nМеню\n";
         cout << "1. Добавить трубу\n";
         cout << "2. Добавить КС\n";
         cout << "3. Просмотр всех объектов\n";
@@ -211,15 +228,33 @@ int main() {
 
         vibor_menyu = vvod_celogo(0, 7);
 
-        if (vibor_menyu == 1) dobavit_trubu(moya_truba);
-        else if (vibor_menyu == 2) dobavit_stanciyu(moya_stanciya);
-        else if (vibor_menyu == 3) prosmotr(moya_truba, moya_stanciya);
-        else if (vibor_menyu == 4) redaktirovat_trubu(moya_truba);
-        else if (vibor_menyu == 5) redaktirovat_stanciyu(moya_stanciya);
-        else if (vibor_menyu == 6) sohranit(moya_truba, moya_stanciya);
-        else if (vibor_menyu == 7) zagruzit(moya_truba, moya_stanciya);
-        else if (vibor_menyu == 0) {
+        switch (vibor_menyu) {
+        case 1:
+            dobavit_trubu(moya_truba);
+            break;
+        case 2:
+            dobavit_stanciyu(moya_stanciya);
+            break;
+        case 3:
+            prosmotr(moya_truba, moya_stanciya);
+            break;
+        case 4:
+            redaktirovat_trubu(moya_truba);
+            break;
+        case 5:
+            redaktirovat_stanciyu(moya_stanciya);
+            break;
+        case 6:
+            sohranit(moya_truba, moya_stanciya);
+            break;
+        case 7:
+            zagruzit(moya_truba, moya_stanciya);
+            break;
+        case 0:
             cout << "Выход из программы...\n";
+            log_fayl.close();
+            return 0;
+        default:
             break;
         }
     }
