@@ -3,6 +3,7 @@
 #include <fstream>
 #include <clocale>
 #include <map>
+#include <vector>
 
 using namespace std;
 
@@ -50,7 +51,7 @@ double vvod_drobnogo(double min_znachenie, double max_znachenie) {
     return chislo;
 }
 
-// Вспомогательные функции вывода одного объекта (чтобы не дублировать код)
+// Вспомогательные функции вывода одного объекта
 void pokazat_trubu(int id, Truba& truba) {
     cout << "\n--- ТРУБА (ID: " << id << ") ---\n";
     cout << "Название: " << truba.nazvanie << "\n";
@@ -60,10 +61,12 @@ void pokazat_trubu(int id, Truba& truba) {
 }
 
 void pokazat_stanciyu(int id, Stanciya& stanciya) {
+    double procent = (stanciya.vsego_cehov - stanciya.rabochih_cehov) * 100.0 / stanciya.vsego_cehov;
     cout << "\n--- СТАНЦИЯ (ID: " << id << ") ---\n";
     cout << "Название: " << stanciya.nazvanie << "\n";
     cout << "Всего цехов: " << stanciya.vsego_cehov << "\n";
     cout << "Рабочих цехов: " << stanciya.rabochih_cehov << "\n";
+    cout << "Незадействовано цехов: " << procent << "%\n";
     cout << "Класс станции: " << stanciya.klass << "\n";
 }
 
@@ -216,6 +219,114 @@ void udalit_stanciyu(map<int, Stanciya>& stancii) {
     }
 }
 
+// Функции поиска объектов по фильтру
+void poisk_trub(map<int, Truba>& trubi) {
+    if (trubi.empty()) {
+        cout << "Список труб пуст!\n";
+        return;
+    }
+
+    cout << "Фильтр поиска труб:\n";
+    cout << "1 - По названию\n";
+    cout << "2 - По признаку 'в ремонте'\n";
+    cout << "Ваш выбор: ";
+    int vibor = vvod_celogo(1, 2);
+
+    vector<int> naydennie_id;
+
+    if (vibor == 1) {
+        string poisk_nazvanie;
+        cout << "Введите название (или часть названия) трубы: ";
+        cin >> ws;
+        getline(cin, poisk_nazvanie);
+        log_fayl << poisk_nazvanie << endl;
+
+        for (auto& para : trubi) {
+            if (para.second.nazvanie.find(poisk_nazvanie) != string::npos) {
+                naydennie_id.push_back(para.first);
+            }
+        }
+    }
+    else {
+        cout << "Искать трубы в ремонте? (1 - да, 0 - нет): ";
+        bool poisk_remont = vvod_celogo(0, 1);
+
+        for (auto& para : trubi) {
+            if (para.second.v_remonte == poisk_remont) {
+                naydennie_id.push_back(para.first);
+            }
+        }
+    }
+
+    if (naydennie_id.empty()) {
+        cout << "Трубы по заданному фильтру не найдены.\n";
+    }
+    else {
+        cout << "\nНайдено труб: " << naydennie_id.size() << "\n";
+        for (int id : naydennie_id) {
+            pokazat_trubu(id, trubi[id]);
+        }
+    }
+}
+
+void poisk_stanciy(map<int, Stanciya>& stancii) {
+    if (stancii.empty()) {
+        cout << "Список станций пуст!\n";
+        return;
+    }
+
+    cout << "Фильтр поиска КС:\n";
+    cout << "1 - По названию\n";
+    cout << "2 - По проценту незадействованных цехов\n";
+    cout << "Ваш выбор: ";
+    int vibor = vvod_celogo(1, 2);
+
+    vector<int> naydennie_id;
+
+    if (vibor == 1) {
+        string poisk_nazvanie;
+        cout << "Введите название (или часть названия) станции: ";
+        cin >> ws;
+        getline(cin, poisk_nazvanie);
+        log_fayl << poisk_nazvanie << endl;
+
+        for (auto& para : stancii) {
+            if (para.second.nazvanie.find(poisk_nazvanie) != string::npos) {
+                naydennie_id.push_back(para.first);
+            }
+        }
+    }
+    else {
+        cout << "Введите процент незадействованных цехов (0 - 100): ";
+        double zadanniy_procent = vvod_drobnogo(0.0, 100.0);
+        cout << "Условие (1 - Больше или равно, 2 - Меньше или равно, 3 - Точно равно): ";
+        int uslovie = vvod_celogo(1, 3);
+
+        for (auto& para : stancii) {
+            double procent = (para.second.vsego_cehov - para.second.rabochih_cehov) * 100.0 / para.second.vsego_cehov;
+            if (uslovie == 1 && procent >= zadanniy_procent) {
+                naydennie_id.push_back(para.first);
+            }
+            else if (uslovie == 2 && procent <= zadanniy_procent) {
+                naydennie_id.push_back(para.first);
+            }
+            else if (uslovie == 3 && (int)procent == (int)zadanniy_procent) {
+                naydennie_id.push_back(para.first);
+            }
+        }
+    }
+
+    if (naydennie_id.empty()) {
+        cout << "Станции по заданному фильтру не найдены.\n";
+    }
+    else {
+        cout << "\nНайдено станций: " << naydennie_id.size() << "\n";
+        for (int id : naydennie_id) {
+            pokazat_stanciyu(id, stancii[id]);
+        }
+    }
+}
+
 // Работа с файлами
 void sohranit(map<int, Truba>& trubi, map<int, Stanciya>& stancii) {
     string imya_fayla;
@@ -321,12 +432,14 @@ int main() {
         cout << "5. Редактировать КС\n";
         cout << "6. Удалить трубу\n";
         cout << "7. Удалить КС\n";
-        cout << "8. Сохранить\n";
-        cout << "9. Загрузить\n";
+        cout << "8. Поиск труб\n";
+        cout << "9. Поиск КС\n";
+        cout << "10. Сохранить\n";
+        cout << "11. Загрузить\n";
         cout << "0. Выход\n";
         cout << "Выберите действие: ";
 
-        vibor_menyu = vvod_celogo(0, 9);
+        vibor_menyu = vvod_celogo(0, 11);
 
         switch (vibor_menyu) {
         case 1:
@@ -351,9 +464,15 @@ int main() {
             udalit_stanciyu(stancii);
             break;
         case 8:
-            sohranit(trubi, stancii);
+            poisk_trub(trubi);
             break;
         case 9:
+            poisk_stanciy(stancii);
+            break;
+        case 10:
+            sohranit(trubi, stancii);
+            break;
+        case 11:
             zagruzit(trubi, stancii, id_trubi, id_stancii);
             break;
         case 0:
