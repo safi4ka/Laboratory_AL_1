@@ -2,21 +2,24 @@
 #include <string>
 #include <fstream>
 #include <clocale>
+#include <map>
 
 using namespace std;
 
 // Файл для логирования действий пользователя
 ofstream log_fayl("log.txt");
 
-// Базовые структуры
-struct Truba {
+// Базовые классы (заменили struct на class для выполнения ТЗ)
+class Truba {
+public:
     string nazvanie = "";
     double dlina = 0.0;
     int diametr = 0;
     bool v_remonte = false;
 };
 
-struct Stanciya {
+class Stanciya {
+public:
     string nazvanie = "";
     int vsego_cehov = 0;
     int rabochih_cehov = 0;
@@ -47,12 +50,13 @@ double vvod_drobnogo(double min_znachenie, double max_znachenie) {
     return chislo;
 }
 
-// Функции добавления
-void dobavit_trubu(Truba& truba) {
+// Функции добавления (теперь добавляют объекты в map с уникальным ID)
+void dobavit_trubu(map<int, Truba>& trubi, int& id_trubi) {
+    Truba truba;
     cout << "Введите название трубы: ";
     cin >> ws;
     getline(cin, truba.nazvanie);
-    log_fayl << truba.nazvanie << endl; // Логируем название трубы
+    log_fayl << truba.nazvanie << endl;
 
     cout << "Введите длину (км): ";
     truba.dlina = vvod_drobnogo(0.1, 100000.0);
@@ -60,14 +64,18 @@ void dobavit_trubu(Truba& truba) {
     truba.diametr = vvod_celogo(10, 5000);
     cout << "Труба в ремонте? (1 - да, 0 - нет): ";
     truba.v_remonte = vvod_celogo(0, 1);
-    cout << "Труба успешно добавлена!\n";
+
+    id_trubi++;
+    trubi[id_trubi] = truba;
+    cout << "Труба успешно добавлена! Её ID: " << id_trubi << "\n";
 }
 
-void dobavit_stanciyu(Stanciya& stanciya) {
+void dobavit_stanciyu(map<int, Stanciya>& stancii, int& id_stancii) {
+    Stanciya stanciya;
     cout << "Введите название станции: ";
     cin >> ws;
     getline(cin, stanciya.nazvanie);
-    log_fayl << stanciya.nazvanie << endl; // Логируем название станции
+    log_fayl << stanciya.nazvanie << endl;
 
     cout << "Введите всего цехов: ";
     stanciya.vsego_cehov = vvod_celogo(1, 100);
@@ -75,55 +83,80 @@ void dobavit_stanciyu(Stanciya& stanciya) {
     stanciya.rabochih_cehov = vvod_celogo(0, stanciya.vsego_cehov);
     cout << "Введите класс станции (1-5): ";
     stanciya.klass = vvod_celogo(1, 5);
-    cout << "Станция успешно добавлена!\n";
+
+    id_stancii++;
+    stancii[id_stancii] = stanciya;
+    cout << "Станция успешно добавлена! Её ID: " << id_stancii << "\n";
 }
 
-// Функция просмотра
-void prosmotr(Truba& truba, Stanciya& stanciya) {
-    if (truba.dlina) {
-        cout << "\n--- ТРУБА ---\n";
-        cout << "Название: " << truba.nazvanie << "\n";
-        cout << "Длина: " << truba.dlina << " км\n";
-        cout << "Диаметр: " << truba.diametr << " мм\n";
-        cout << "В ремонте: " << (truba.v_remonte ? "Да" : "Нет") << "\n";
+// Функция просмотра всех объектов
+void prosmotr(map<int, Truba>& trubi, map<int, Stanciya>& stancii) {
+    cout << "\n=== СПИСОК ТРУБ ===\n";
+    if (trubi.empty()) {
+        cout << "Трубы не созданы.\n";
     }
     else {
-        cout << "\nТруба не создана.\n";
+        for (auto& para : trubi) {
+            cout << "\n--- ТРУБА (ID: " << para.first << ") ---\n";
+            cout << "Название: " << para.second.nazvanie << "\n";
+            cout << "Длина: " << para.second.dlina << " км\n";
+            cout << "Диаметр: " << para.second.diametr << " мм\n";
+            cout << "В ремонте: " << (para.second.v_remonte ? "Да" : "Нет") << "\n";
+        }
     }
 
-    if (stanciya.vsego_cehov) {
-        cout << "\n--- СТАНЦИЯ ---\n";
-        cout << "Название: " << stanciya.nazvanie << "\n";
-        cout << "Всего цехов: " << stanciya.vsego_cehov << "\n";
-        cout << "Рабочих цехов: " << stanciya.rabochih_cehov << "\n";
-        cout << "Класс станции: " << stanciya.klass << "\n";
+    cout << "\n=== СПИСОК СТАНЦИЙ ===\n";
+    if (stancii.empty()) {
+        cout << "Станции не созданы.\n";
     }
     else {
-        cout << "\nСтанция не создана.\n";
+        for (auto& para : stancii) {
+            cout << "\n--- СТАНЦИЯ (ID: " << para.first << ") ---\n";
+            cout << "Название: " << para.second.nazvanie << "\n";
+            cout << "Всего цехов: " << para.second.vsego_cehov << "\n";
+            cout << "Рабочих цехов: " << para.second.rabochih_cehov << "\n";
+            cout << "Класс станции: " << para.second.klass << "\n";
+        }
     }
 }
 
-// Функции редактирования
-void redaktirovat_trubu(Truba& truba) {
-    if (!truba.dlina) {
-        cout << "Ошибка: Сначала добавьте трубу!\n";
+// Функции редактирования по ID
+void redaktirovat_trubu(map<int, Truba>& trubi) {
+    if (trubi.empty()) {
+        cout << "Ошибка: Сначала добавьте хотя бы одну трубу!\n";
         return;
     }
-    cout << "Труба в ремонте? (Сейчас: " << truba.v_remonte << "). Введите 1 (да) или 0 (нет): ";
-    truba.v_remonte = vvod_celogo(0, 1);
+    cout << "Введите ID трубы для редактирования: ";
+    int id = vvod_celogo(1, 100000);
+
+    if (trubi.find(id) == trubi.end()) {
+        cout << "Ошибка: Труба с таким ID не найдена!\n";
+        return;
+    }
+
+    cout << "Труба в ремонте? (Сейчас: " << trubi[id].v_remonte << "). Введите 1 (да) или 0 (нет): ";
+    trubi[id].v_remonte = vvod_celogo(0, 1);
     cout << "Статус трубы обновлен!\n";
 }
 
-void redaktirovat_stanciyu(Stanciya& stanciya) {
-    if (!stanciya.vsego_cehov) {
-        cout << "Ошибка: Сначала добавьте станцию!\n";
+void redaktirovat_stanciyu(map<int, Stanciya>& stancii) {
+    if (stancii.empty()) {
+        cout << "Ошибка: Сначала добавьте хотя бы одну станцию!\n";
         return;
     }
+    cout << "Введите ID станции для редактирования: ";
+    int id = vvod_celogo(1, 100000);
+
+    if (stancii.find(id) == stancii.end()) {
+        cout << "Ошибка: Станция с таким ID не найдена!\n";
+        return;
+    }
+
     cout << "1 - Запустить цех, 2 - Остановить цех. Ваш выбор: ";
     int deystvie = vvod_celogo(1, 2);
     if (deystvie == 1) {
-        if (stanciya.rabochih_cehov < stanciya.vsego_cehov) {
-            stanciya.rabochih_cehov++;
+        if (stancii[id].rabochih_cehov < stancii[id].vsego_cehov) {
+            stancii[id].rabochih_cehov++;
             cout << "Цех запущен!\n";
         }
         else {
@@ -131,8 +164,8 @@ void redaktirovat_stanciyu(Stanciya& stanciya) {
         }
     }
     else {
-        if (stanciya.rabochih_cehov > 0) {
-            stanciya.rabochih_cehov--;
+        if (stancii[id].rabochih_cehov > 0) {
+            stancii[id].rabochih_cehov--;
             cout << "Цех остановлен!\n";
         }
         else {
@@ -141,29 +174,32 @@ void redaktirovat_stanciyu(Stanciya& stanciya) {
     }
 }
 
-// Работа с файлами
-void sohranit(Truba& truba, Stanciya& stanciya) {
+// Работа с файлами (сохранение и загрузка всех объектов)
+void sohranit(map<int, Truba>& trubi, map<int, Stanciya>& stancii) {
     string imya_fayla;
     cout << "Введите название файла для сохранения (например, dannie.txt): ";
     cin >> ws;
     getline(cin, imya_fayla);
-    log_fayl << imya_fayla << endl; // Логируем имя файла
+    log_fayl << imya_fayla << endl;
 
     ofstream fayl(imya_fayla);
     if (fayl.is_open()) {
-        fayl << truba.dlina << endl;
-        if (truba.dlina) {
-            fayl << truba.nazvanie << endl;
-            fayl << truba.dlina << endl;
-            fayl << truba.diametr << endl;
-            fayl << truba.v_remonte << endl;
+        fayl << trubi.size() << endl;
+        for (auto& para : trubi) {
+            fayl << para.first << endl;
+            fayl << para.second.nazvanie << endl;
+            fayl << para.second.dlina << endl;
+            fayl << para.second.diametr << endl;
+            fayl << para.second.v_remonte << endl;
         }
-        fayl << stanciya.vsego_cehov << endl;
-        if (stanciya.vsego_cehov) {
-            fayl << stanciya.nazvanie << endl;
-            fayl << stanciya.vsego_cehov << endl;
-            fayl << stanciya.rabochih_cehov << endl;
-            fayl << stanciya.klass << endl;
+
+        fayl << stancii.size() << endl;
+        for (auto& para : stancii) {
+            fayl << para.first << endl;
+            fayl << para.second.nazvanie << endl;
+            fayl << para.second.vsego_cehov << endl;
+            fayl << para.second.rabochih_cehov << endl;
+            fayl << para.second.klass << endl;
         }
         cout << "Данные сохранены в файл " << imya_fayla << "!\n";
         fayl.close();
@@ -173,30 +209,48 @@ void sohranit(Truba& truba, Stanciya& stanciya) {
     }
 }
 
-void zagruzit(Truba& truba, Stanciya& stanciya) {
+void zagruzit(map<int, Truba>& trubi, map<int, Stanciya>& stancii, int& id_trubi, int& id_stancii) {
     string imya_fayla;
     cout << "Введите название файла для загрузки (например, dannie.txt): ";
     cin >> ws;
     getline(cin, imya_fayla);
-    log_fayl << imya_fayla << endl; // Логируем имя файла
+    log_fayl << imya_fayla << endl;
 
     ifstream fayl(imya_fayla);
     if (fayl.is_open()) {
-        fayl >> truba.dlina;
-        if (truba.dlina) {
+        trubi.clear();
+        stancii.clear();
+        id_trubi = 0;
+        id_stancii = 0;
+
+        int kolvo_trub;
+        fayl >> kolvo_trub;
+        for (int i = 0; i < kolvo_trub; i++) {
+            int id;
+            Truba truba;
+            fayl >> id;
             fayl >> ws;
             getline(fayl, truba.nazvanie);
             fayl >> truba.dlina;
             fayl >> truba.diametr;
             fayl >> truba.v_remonte;
+            trubi[id] = truba;
+            if (id > id_trubi) id_trubi = id;
         }
-        fayl >> stanciya.vsego_cehov;
-        if (stanciya.vsego_cehov) {
+
+        int kolvo_stanciy;
+        fayl >> kolvo_stanciy;
+        for (int i = 0; i < kolvo_stanciy; i++) {
+            int id;
+            Stanciya stanciya;
+            fayl >> id;
             fayl >> ws;
             getline(fayl, stanciya.nazvanie);
             fayl >> stanciya.vsego_cehov;
             fayl >> stanciya.rabochih_cehov;
             fayl >> stanciya.klass;
+            stancii[id] = stanciya;
+            if (id > id_stancii) id_stancii = id;
         }
         cout << "Данные загружены из файла " << imya_fayla << "!\n";
         fayl.close();
@@ -208,10 +262,12 @@ void zagruzit(Truba& truba, Stanciya& stanciya) {
 
 // Главное меню
 int main() {
-    setlocale(LC_ALL, "Russian"); // Включение кириллицы в консоли
+    setlocale(LC_ALL, "Russian");
 
-    Truba moya_truba;
-    Stanciya moya_stanciya;
+    map<int, Truba> trubi;
+    map<int, Stanciya> stancii;
+    int id_trubi = 0;
+    int id_stancii = 0;
     int vibor_menyu;
 
     while (true) {
@@ -230,25 +286,25 @@ int main() {
 
         switch (vibor_menyu) {
         case 1:
-            dobavit_trubu(moya_truba);
+            dobavit_trubu(trubi, id_trubi);
             break;
         case 2:
-            dobavit_stanciyu(moya_stanciya);
+            dobavit_stanciyu(stancii, id_stancii);
             break;
         case 3:
-            prosmotr(moya_truba, moya_stanciya);
+            prosmotr(trubi, stancii);
             break;
         case 4:
-            redaktirovat_trubu(moya_truba);
+            redaktirovat_trubu(trubi);
             break;
         case 5:
-            redaktirovat_stanciyu(moya_stanciya);
+            redaktirovat_stanciyu(stancii);
             break;
         case 6:
-            sohranit(moya_truba, moya_stanciya);
+            sohranit(trubi, stancii);
             break;
         case 7:
-            zagruzit(moya_truba, moya_stanciya);
+            zagruzit(trubi, stancii, id_trubi, id_stancii);
             break;
         case 0:
             cout << "Выход из программы...\n";
