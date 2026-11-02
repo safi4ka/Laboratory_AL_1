@@ -219,6 +219,77 @@ void udalit_stanciyu(map<int, Stanciya>& stancii) {
     }
 }
 
+// Пакетное редактирование и удаление найденных труб
+void paketnoe_redaktirovanie_trub(map<int, Truba>& trubi, vector<int>& naydennie_id) {
+    cout << "\nПакетная обработка найденных труб:\n";
+    cout << "1 - Редактировать найденные трубы\n";
+    cout << "2 - Удалить найденные трубы\n";
+    cout << "0 - Ничего не делать (вернуться в меню)\n";
+    cout << "Ваш выбор: ";
+    int deystvie = vvod_celogo(0, 2);
+
+    if (deystvie == 0) {
+        return;
+    }
+
+    cout << "1 - Применить ко ВСЕМ найденным трубам\n";
+    cout << "2 - Выбрать конкретные трубы по ID\n";
+    cout << "Ваш выбор: ";
+    int rezhim = vvod_celogo(1, 2);
+
+    vector<int> vibrannie_id;
+
+    if (rezhim == 1) {
+        vibrannie_id = naydennie_id;
+    }
+    else {
+        while (true) {
+            cout << "Введите ID трубы из найденных (0 - завершить выбор): ";
+            int id = vvod_celogo(0, 100000);
+            if (id == 0) {
+                break;
+            }
+
+            // Проверяем, есть ли этот ID среди найденных
+            bool est_v_spiske = false;
+            for (int naydenniy : naydennie_id) {
+                if (naydenniy == id) {
+                    est_v_spiske = true;
+                    break;
+                }
+            }
+
+            if (est_v_spiske) {
+                vibrannie_id.push_back(id);
+                cout << "Труба с ID " << id << " добавлена в выборку.\n";
+            }
+            else {
+                cout << "Ошибка: Трубы с таким ID нет среди найденных!\n";
+            }
+        }
+    }
+
+    if (vibrannie_id.empty()) {
+        cout << "Не выбрано ни одной трубы.\n";
+        return;
+    }
+
+    if (deystvie == 1) {
+        cout << "Установить статус 'в ремонте' для выбранных труб? (1 - да, 0 - нет): ";
+        bool noviy_status = vvod_celogo(0, 1);
+        for (int id : vibrannie_id) {
+            trubi[id].v_remonte = noviy_status;
+        }
+        cout << "Статус выбранных труб успешно обновлен!\n";
+    }
+    else if (deystvie == 2) {
+        for (int id : vibrannie_id) {
+            trubi.erase(id);
+        }
+        cout << "Выбранные трубы успешно удалены!\n";
+    }
+}
+
 // Функции поиска объектов по фильтру
 void poisk_trub(map<int, Truba>& trubi) {
     if (trubi.empty()) {
@@ -266,6 +337,8 @@ void poisk_trub(map<int, Truba>& trubi) {
         for (int id : naydennie_id) {
             pokazat_trubu(id, trubi[id]);
         }
+        // Вызываем пакетное редактирование для найденных труб
+        paketnoe_redaktirovanie_trub(trubi, naydennie_id);
     }
 }
 
@@ -432,7 +505,7 @@ int main() {
         cout << "5. Редактировать КС\n";
         cout << "6. Удалить трубу\n";
         cout << "7. Удалить КС\n";
-        cout << "8. Поиск труб\n";
+        cout << "8. Поиск и пакетное редактирование труб\n";
         cout << "9. Поиск КС\n";
         cout << "10. Сохранить\n";
         cout << "11. Загрузить\n";
